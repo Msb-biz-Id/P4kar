@@ -47,20 +47,44 @@ Jika repositori GitHub Anda bersifat **Privat**, cPanel membutuhkan kunci SSH (*
     *   *Opsional*: Centang "Allow write access" jika Anda membutuhkan cPanel untuk mengirim push kembali ke GitHub (biasanya cukup read-only, jadi tidak perlu dicentang).
     *   Klik **Add key**.
 
----
+## 4. Langkah 3: Melakukan Clone Repositori di cPanel
 
-## 4. Langkah 3: Menggunakan Fitur "Git Version Control" cPanel
+Ada dua cara untuk melakukan klon (*clone*) repositori GitHub Anda ke dalam cPanel, yaitu melalui **GUI (Menu Git Version Control)** atau melalui **Terminal cPanel**.
+
+### Opsi A: Menggunakan Fitur "Git Version Control" cPanel (GUI)
 1.  Masuk ke cPanel, cari dan buka menu **Git™ Version Control**.
 2.  Klik tombol **Create** (atau **Clone a Repository**).
 3.  Konfigurasikan isian berikut:
     *   **Clone URL**: Masukkan alamat repositori Git Anda.
-        *   Jika *Privat* (menggunakan SSH): `git@github.com:USERNAME/NAMA_REPOSITORI.git`
-        *   Jika *Publik* (bisa menggunakan HTTPS): `https://github.com/USERNAME/NAMA_REPOSITORI.git`
+        *   Jika *Privat* (menggunakan SSH): `git@github.com:Msb-biz-Id/sistempakar.git`
+        *   Jika *Publik* (bisa menggunakan HTTPS): `https://github.com/Msb-biz-Id/sistempakar.git`
     *   **Directory Path**: Lokasi folder penyimpanan di hosting.
         > [!IMPORTANT]
         > Demi keamanan, jangan meng-clone proyek langsung ke dalam folder `public_html`. Letakkan folder proyek di luar folder publik (misalnya: `/home/username/expert-sistem`). Ini mencegah berkas sensitif seperti `.env` diakses langsung melalui web browser.
     *   **Repository Name**: Berikan nama repositori bebas (misal: `expert-sistem`).
 4.  Klik tombol **Create**. Tunggu beberapa saat hingga cPanel selesai meng-clone proyek dari GitHub.
+
+### Opsi B: Menggunakan Terminal cPanel (Command Line)
+Jika Anda lebih menyukai baris perintah, Anda dapat melakukan kloning langsung melalui terminal:
+1.  Buka menu **Terminal** di dashboard cPanel Anda.
+2.  Pastikan Anda berada di direktori Home cPanel Anda (di luar `public_html`):
+    ```bash
+    cd ~
+    ```
+3.  Jalankan perintah `git clone` berikut:
+    *   **Jika Repositori Publik (HTTPS)**:
+        ```bash
+        git clone https://github.com/Msb-biz-Id/sistempakar.git expert-sistem
+        ```
+    *   **Jika Repositori Privat (SSH)**:
+        *(Pastikan Anda telah melakukan otorisasi SSH Key cPanel ke GitHub pada Langkah 2)*
+        ```bash
+        git clone git@github.com:Msb-biz-Id/sistempakar.git expert-sistem
+        ```
+4.  Proyek Anda sekarang berhasil ter-clone di direktori `/home/username/expert-sistem`. Silakan beralih ke folder proyek tersebut:
+    ```bash
+    cd expert-sistem
+    ```
 
 ---
 
