@@ -108,7 +108,7 @@
     <div class="hero text-center d-flex align-items-center">
         <div class="container py-3">
             <h1 class="display-4 hero-title">Deteksi Dini Kesehatan Ibu Hamil<br><span style="color: #5eead4;">Lebih Mudah & Cepat</span></h1>
-            <p class="lead hero-subtitle mt-3">Sistem pakar berbasis kecerdasan buatan untuk mengidentifikasi potensi penyakit atau kelainan selama masa kehamilan menggunakan metode <strong>Naive Bayes Classifier</strong> secara instan.</p>
+            <p class="lead hero-subtitle mt-3">Sistem pakar berbasis penalaran maju untuk mendeteksi risiko komplikasi selama masa kehamilan menggunakan <strong>Metode Forward Chaining</strong> berdasarkan basis aturan klinis yang terstruktur.</p>
             <div class="mt-4 pt-2">
                 <a href="{{ route('konsultasi') }}" class="btn btn-custom-start btn-lg">
                     <i class="fas fa-stethoscope me-2"></i> Mulai Konsultasi Sekarang
@@ -121,45 +121,62 @@
         <div class="text-center mb-5">
             <span class="badge px-3 py-2 bg-teal-soft text-teal-800 fw-semibold mb-2" style="background-color: #ccfbf1; color: #0f766e;">CAKUPAN DETEKSI</span>
             <h2 class="fw-bold" style="letter-spacing: -0.02em;">Penyakit & Kelainan yang Didukung</h2>
-            <p class="text-muted">Sistem pakar dirancang untuk mengenali pola gejala dari 3 kondisi medis berikut:</p>
+            <p class="text-muted">Sistem pakar dirancang untuk menalar pola 50 gejala klinis ke dalam 3 kondisi medis kebidanan serta kategori tanda bahaya:</p>
         </div>
 
         <div class="row justify-content-center">
             <!-- Anemia -->
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card card-custom h-100 p-3">
                     <div class="card-body">
                         <div class="icon-box icon-anemia">
                             <i class="fas fa-tint"></i>
                         </div>
+                        <div class="badge bg-danger-subtle text-danger mb-2 px-2 py-1">KODE: P01</div>
                         <h4 class="fw-bold mb-2">Anemia</h4>
-                        <p class="text-secondary leading-relaxed small">Kondisi kekurangan sel darah merah atau hemoglobin, yang menyebabkan pasokan oksigen ke janin dan jaringan ibu hamil menjadi berkurang.</p>
+                        <p class="text-secondary leading-relaxed small">Defisiensi sel darah merah atau hemoglobin yang menurunkan suplai oksigen ke jaringan ibu dan janin. Dianalisis melalui aturan inferensi R01-R04 dan aturan lama R16-R17.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Pankreatitis -->
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card card-custom h-100 p-3">
                     <div class="card-body">
                         <div class="icon-box icon-pankreas">
                             <i class="fas fa-fire-alt"></i>
                         </div>
+                        <div class="badge bg-warning-subtle text-warning mb-2 px-2 py-1">KODE: P02</div>
                         <h4 class="fw-bold mb-2">Pankreatitis</h4>
-                        <p class="text-secondary leading-relaxed small">Peradangan hebat pada organ pankreas yang memerlukan tindakan medis segera guna mencegah komplikasi kritis bagi ibu dan calon bayi.</p>
+                        <p class="text-secondary leading-relaxed small">Inflamasi akut pada organ pankreas yang merupakan kegawatdaruratan obstetri. Dianalisis melalui aturan inferensi R05-R08 dan aturan lama R18-R19.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Diabetes -->
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card card-custom h-100 p-3">
                     <div class="card-body">
                         <div class="icon-box icon-diabetes">
                             <i class="fas fa-syringe"></i>
                         </div>
+                        <div class="badge bg-info-subtle text-info mb-2 px-2 py-1">KODE: P03</div>
                         <h4 class="fw-bold mb-2">Diabetes Melitus</h4>
-                        <p class="text-secondary leading-relaxed small">Gangguan regulasi kadar gula darah (glukosa) selama masa kehamilan (Gestasional) yang dapat memengaruhi pertumbuhan janin.</p>
+                        <p class="text-secondary leading-relaxed small">Gangguan toleransi glukosa selama masa kehamilan (Gestasional) yang memengaruhi metabolisme janin. Dianalisis melalui aturan inferensi R09-R12 dan aturan lama R20-R21.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tanda Bahaya (F04) -->
+            <div class="col-md-3 mb-4">
+                <div class="card card-custom h-100 p-3">
+                    <div class="card-body">
+                        <div class="icon-box" style="background-color: #fee2e2; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="badge bg-danger-subtle text-danger mb-2 px-2 py-1">KODE: P04</div>
+                        <h4 class="fw-bold mb-2">Tanda Bahaya</h4>
+                        <p class="text-secondary leading-relaxed small">Kesimpulan F04: gejala yang memerlukan evaluasi medis segera (tekanan darah menurun, urine berkurang, kesadaran menurun, napas berbau buah, dan lainnya). Dianalisis melalui aturan R13 (operator OR) dan R14-R15.</p>
                     </div>
                 </div>
             </div>
@@ -167,7 +184,10 @@
     </div>
 
     <footer class="bg-dark text-white text-center py-4 mt-5 border-top">
-        <p class="mb-0 small text-gray-400">&copy; 2026 Sistem Pakar Diagnosa Ibu Hamil | Dikembangkan dengan Metode Naive Bayes Classifier</p>
+        <p class="mb-0 small text-gray-400">&copy; 2026 Sistem Pakar Diagnosa Ibu Hamil | Dikembangkan dengan Metode Forward Chaining</p>
     </footer>
+
+    <!-- Bootstrap JS for navbar toggle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

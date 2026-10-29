@@ -4,11 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Gejala extends Model
 {
-    protected $fillable = ['nama_gejala'];
+    protected $fillable = ['kode_gejala', 'nama_gejala'];
     protected $table = 'gejala';
+
+    public function aturans(): BelongsToMany
+    {
+        return $this->belongsToMany(Aturan::class, 'aturan_gejala', 'gejala_id', 'aturan_id');
+    }
 
     public function relasis(): HasMany
     {

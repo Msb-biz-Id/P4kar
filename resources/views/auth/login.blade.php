@@ -6,7 +6,7 @@
         <div class="card-body">
             <p class="login-box-msg small text-muted">
                 DIAGNOSA PENYAKIT DAN KELAINAN PADA IBU HAMIL<br>
-                MENGGUNAKAN METODE NAIVE BAYES CLASSIFIER
+                MENGGUNAKAN METODE FORWARD CHAINING
             </p>
 
             <x-auth-session-status class="mb-3" :status="session('status')" />

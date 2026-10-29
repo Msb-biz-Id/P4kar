@@ -159,7 +159,10 @@
                             <!-- Gejala Section -->
                             <div class="mb-4">
                                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
-                                    <label class="form-label fw-bold text-secondary mb-0">Pilih Gejala yang Anda Rasakan <span class="text-danger">*</span></label>
+                                    <div>
+                                        <label class="form-label fw-bold text-secondary mb-0">Pilih Gejala yang Anda Rasakan <span class="text-danger">*</span></label>
+                                        <span id="selectedCountBadge" class="badge ms-2" style="background-color: #ccfbf1; color: #0f766e;">0 Gejala Dipilih</span>
+                                    </div>
                                     
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-custom" id="selectAllBtn"><i class="fas fa-check-double me-1"></i> Pilih Semua</button>
@@ -179,8 +182,8 @@
                                     <div class="col-md-6 mb-3 symptom-card-wrapper">
                                         <div class="symptom-card" data-wrapper-id="{{ $g->id }}">
                                             <input class="form-check-input symptom-checkbox" type="checkbox" name="gejala[]" value="{{ $g->id }}" id="g{{ $g->id }}">
-                                            <label class="symptom-label-text flex-grow-1 mb-0" for="g{{ $g->id }}">
-                                                <span class="d-inline-block text-muted me-1 fw-normal">{{ $loop->iteration }}.</span>
+                                            <label class="symptom-label-text flex-grow-1 mb-0 d-flex align-items-center" for="g{{ $g->id }}">
+                                                <span class="badge bg-secondary-subtle text-secondary me-2 px-2 py-1 fw-bold font-monospace">{{ $g->kode_gejala ?? 'G' . str_pad($g->id, 2, '0', STR_PAD_LEFT) }}</span>
                                                 <span class="symptom-name">{{ $g->nama_gejala }}</span>
                                             </label>
                                         </div>
@@ -208,6 +211,20 @@
             const checkboxes = document.querySelectorAll('.symptom-checkbox');
             const wrappers = document.querySelectorAll('.symptom-card-wrapper');
 
+            const countBadge = document.getElementById('selectedCountBadge');
+
+            function updateCounter() {
+                const checkedCount = document.querySelectorAll('.symptom-checkbox:checked').length;
+                countBadge.textContent = checkedCount + ' Gejala Dipilih';
+                if (checkedCount > 0) {
+                    countBadge.style.backgroundColor = '#ccfbf1';
+                    countBadge.style.color = '#0f766e';
+                } else {
+                    countBadge.style.backgroundColor = '#f1f5f9';
+                    countBadge.style.color = '#64748b';
+                }
+            }
+
             // Handle Card Selection State
             checkboxes.forEach(function(checkbox) {
                 const card = checkbox.closest('.symptom-card');
@@ -224,6 +241,7 @@
                     } else {
                         card.classList.remove('selected');
                     }
+                    updateCounter();
                 });
 
                 // Let clicking the card label toggle the checked state
@@ -251,13 +269,13 @@
             // Select All
             selectAllBtn.addEventListener('click', function() {
                 checkboxes.forEach(function(checkbox) {
-                    // Check only visible ones
                     const wrapper = checkbox.closest('.symptom-card-wrapper');
                     if (wrapper.style.display !== 'none') {
                         checkbox.checked = true;
                         checkbox.closest('.symptom-card').classList.add('selected');
                     }
                 });
+                updateCounter();
             });
 
             // Clear All
@@ -266,8 +284,14 @@
                     checkbox.checked = false;
                     checkbox.closest('.symptom-card').classList.remove('selected');
                 });
+                updateCounter();
             });
+
+            updateCounter();
         });
     </script>
+
+    <!-- Bootstrap JS for navbar toggle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

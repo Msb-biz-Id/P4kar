@@ -1,6 +1,6 @@
 # DOKUMENTASI KODE PROGRAM SISTEM PAKAR (SKRIPSI)
 
-Dokumen ini berisi potongan kode program (Source Code) untuk kebutuhan penyusunan bab 4 skripsi pada sistem pakar diagnosa penyakit ibu hamil menggunakan metode Naive Bayes Classifier:
+Dokumen ini berisi potongan kode program (Source Code) untuk kebutuhan penyusunan bab 4 skripsi pada sistem pakar diagnosa penyakit ibu hamil menggunakan metode **Forward Chaining (Basis Aturan IF-THEN)**:
 
 ---
 
@@ -10,12 +10,15 @@ File: `app/Http/Controllers/PenyakitController.php`
 ```php
 public function store(Request $request)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_penyakit' => 'required|string|max:10|unique:penyakit,kode_penyakit',
         'nama_penyakit' => 'required|string|max:255',
         'keterangan' => 'nullable|string',
     ]);
 
-    Penyakit::create($request->only('nama_penyakit', 'keterangan'));
+    $validated['kode_penyakit'] = strtoupper($validated['kode_penyakit']);
+
+    Penyakit::create($validated);
 
     return redirect()->route('admin.penyakit.index')->with('success', 'Penyakit berhasil ditambahkan!');
 }
@@ -29,12 +32,15 @@ File: `app/Http/Controllers/PenyakitController.php`
 ```php
 public function update(Request $request, Penyakit $penyakit)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_penyakit' => ['required', 'string', 'max:10', Rule::unique('penyakit')->ignore($penyakit->id)],
         'nama_penyakit' => 'required|string|max:255',
         'keterangan' => 'nullable|string',
     ]);
 
-    $penyakit->update($request->only('nama_penyakit', 'keterangan'));
+    $validated['kode_penyakit'] = strtoupper($validated['kode_penyakit']);
+
+    $penyakit->update($validated);
 
     return redirect()->route('admin.penyakit.index')->with('success', 'Penyakit berhasil diperbarui!');
 }
@@ -48,11 +54,14 @@ File: `app/Http/Controllers/GejalaController.php`
 ```php
 public function store(Request $request)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_gejala' => 'required|string|max:10|unique:gejala,kode_gejala',
         'nama_gejala' => 'required|string|max:255',
     ]);
 
-    Gejala::create($request->only('nama_gejala'));
+    $validated['kode_gejala'] = strtoupper($validated['kode_gejala']);
+
+    Gejala::create($validated);
 
     return redirect()->route('admin.gejala.index')->with('success', 'Gejala berhasil ditambahkan!');
 }
@@ -66,11 +75,14 @@ File: `app/Http/Controllers/GejalaController.php`
 ```php
 public function update(Request $request, Gejala $gejala)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_gejala' => ['required', 'string', 'max:10', Rule::unique('gejala')->ignore($gejala->id)],
         'nama_gejala' => 'required|string|max:255',
     ]);
 
-    $gejala->update($request->only('nama_gejala'));
+    $validated['kode_gejala'] = strtoupper($validated['kode_gejala']);
+
+    $gejala->update($validated);
 
     return redirect()->route('admin.gejala.index')->with('success', 'Gejala berhasil diperbarui!');
 }
@@ -78,41 +90,64 @@ public function update(Request $request, Gejala $gejala)
 
 ---
 
-### Segmen 4.5 Tambah Relasi
-File: `app/Http/Controllers/RelasiController.php`
+### Segmen 4.5 Tambah Aturan (Basis Pengetahuan Forward Chaining)
+File: `app/Http/Controllers/AturanController.php`
 
 ```php
 public function store(Request $request)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_aturan' => 'required|string|max:20|unique:aturan,kode_aturan',
+        'nama_aturan' => 'required|string|max:255',
         'penyakit_id' => 'required|exists:penyakit,id',
-        'gejala_id' => 'required|exists:gejala,id',
-        'bobot' => 'required|numeric|min:0|max:1',
+        'gejala_ids' => 'required|array|min:1',
+        'gejala_ids.*' => 'exists:gejala,id',
+        'keterangan' => 'nullable|string',
     ]);
 
-    Relasi::create($request->only('penyakit_id', 'gejala_id', 'bobot'));
+    $aturan = Aturan::create([
+        'kode_aturan' => strtoupper($validated['kode_aturan']),
+        'nama_aturan' => $validated['nama_aturan'],
+        'penyakit_id' => $validated['penyakit_id'],
+        'keterangan' => $validated['keterangan'] ?? null,
+        'is_active' => true,
+    ]);
 
-    return redirect()->route('admin.relasi.index')->with('success', 'Relasi berhasil ditambahkan!');
+    $aturan->gejalas()->sync($validated['gejala_ids']);
+
+    return redirect()->route('admin.aturan.index')->with('success', 'Aturan baru berhasil ditambahkan!');
 }
 ```
 
 ---
 
-### Segmen 4.6 Edit Relasi
-File: `app/Http/Controllers/RelasiController.php`
+### Segmen 4.6 Edit Aturan
+File: `app/Http/Controllers/AturanController.php`
 
 ```php
-public function update(Request $request, Relasi $relasi)
+public function update(Request $request, Aturan $aturan)
 {
-    $request->validate([
+    $validated = $request->validate([
+        'kode_aturan' => ['required', 'string', 'max:20', Rule::unique('aturan')->ignore($aturan->id)],
+        'nama_aturan' => 'required|string|max:255',
         'penyakit_id' => 'required|exists:penyakit,id',
-        'gejala_id' => 'required|exists:gejala,id',
-        'bobot' => 'required|numeric|min:0|max:1',
+        'gejala_ids' => 'required|array|min:1',
+        'gejala_ids.*' => 'exists:gejala,id',
+        'keterangan' => 'nullable|string',
+        'is_active' => 'nullable|boolean',
     ]);
 
-    $relasi->update($request->only('penyakit_id', 'gejala_id', 'bobot'));
+    $aturan->update([
+        'kode_aturan' => strtoupper($validated['kode_aturan']),
+        'nama_aturan' => $validated['nama_aturan'],
+        'penyakit_id' => $validated['penyakit_id'],
+        'keterangan' => $validated['keterangan'] ?? null,
+        'is_active' => $request->has('is_active') ? (bool)$request->is_active : true,
+    ]);
 
-    return redirect()->route('admin.relasi.index')->with('success', 'Relasi berhasil diperbarui!');
+    $aturan->gejalas()->sync($validated['gejala_ids']);
+
+    return redirect()->route('admin.aturan.index')->with('success', 'Aturan berhasil diperbarui!');
 }
 ```
 
@@ -158,106 +193,66 @@ public function update(Request $request, Solusi $solusi)
 
 ---
 
-### Segmen 4.9 Perhitungan dan Hasil Diagnosa
-File: `app/Http/Controllers/DiagnosaController.php`
+### Segmen 4.9 Mesin Inferensi Forward Chaining & Proses Diagnosa
+File: `app/Services/ForwardChainingService.php` & `app/Http/Controllers/DiagnosaController.php`
 
 ```php
-public function proses(Request $request)
+// app/Services/ForwardChainingService.php
+public function diagnose(array $gejalaIds): array
 {
-    $validated = $request->validate([
-        'nama_pasien' => 'required|string|max:255',
-        'alamat_pasien' => 'nullable|string|max:255',
-        'gejala' => 'required|array|min:1',
-        'gejala.*' => 'exists:gejala,id',
-    ]);
+    // 1. Inisialisasi Working Memory
+    $faktaGejala = Gejala::whereIn('id', $gejalaIds)->get()->keyBy('id');
+    $faktaIds = $faktaGejala->keys()->toArray();
 
-    $gejalaIds = $request->gejala;
-    $penyakit = Penyakit::with(['relasis', 'solusi'])->get();
+    // 2. Pattern Matching terhadap Basis Aturan
+    $aturans = Aturan::with(['penyakit', 'gejalas'])->where('is_active', true)->get();
+    $evaluasiAturan = [];
+    $exactMatches = [];
 
-    // 1. Perhitungan Naive Bayes dalam log-space untuk mencegah underflow
-    $totalPenyakit = $penyakit->count();
-    $hasilPerhitungan = [];
-    foreach ($penyakit as $p) {
-        // Log prior: log(P(Disease))
-        $logPrior = log(1 / $totalPenyakit);
+    foreach ($aturans as $aturan) {
+        $premisIds = $aturan->gejalas->pluck('id')->toArray();
+        $totalPremis = count($premisIds);
+        $cocokIds = array_values(array_intersect($faktaIds, $premisIds));
+        $cocokCount = count($cocokIds);
+        $matchRatio = $totalPremis > 0 ? ($cocokCount / $totalPremis) : 0;
+        $isExactMatch = ($totalPremis > 0 && $cocokCount === $totalPremis);
 
-        // Log likelihood: log(P(Symptoms|Disease))
-        $relasiMap = $p->relasis->pluck('bobot', 'gejala_id');
-        $logLikelihood = 0;
-
-        foreach ($gejalaIds as $gejalaId) {
-            $bobot = $relasiMap->get($gejalaId, 0.01);
-            if ($bobot <= 0) {
-                $logLikelihood = -INF;
-                break;
-            }
-            $logLikelihood += log($bobot);
-        }
-
-        $hasilPerhitungan[$p->id] = [
-            'id' => $p->id,
-            'nama_penyakit' => $p->nama_penyakit,
-            'log_posterior' => $logLikelihood + $logPrior,
+        $evalItem = [
+            'aturan_id' => $aturan->id,
+            'kode_aturan' => $aturan->kode_aturan,
+            'nama_penyakit' => $aturan->penyakit?->nama_penyakit,
+            'total_premis' => $totalPremis,
+            'cocok_count' => $cocokCount,
+            'match_percentage' => round($matchRatio * 100, 2),
+            'is_exact_match' => $isExactMatch,
         ];
+
+        $evaluasiAturan[] = $evalItem;
+        if ($isExactMatch) {
+            $exactMatches[] = $evalItem;
+        }
     }
 
-    // 2. Normalisasi probabilitas menggunakan softmax (stabilisasi log-sum-exp)
-    $maxLog = max(array_column($hasilPerhitungan, 'log_posterior'));
-    $expSum = 0;
-
-    if ($maxLog === -INF) {
-        foreach ($hasilPerhitungan as &$item) {
-            $item['probabilitas'] = 1 / $totalPenyakit;
-        }
-        unset($item);
+    // 3. Conflict Resolution
+    if (count($exactMatches) > 0) {
+        $statusKesimpulan = 'cocok_penuh';
+        $aturanTerpilih = $exactMatches[0];
+        $penyakitTerpilih = Penyakit::find($aturanTerpilih['penyakit_id']);
     } else {
-        foreach ($hasilPerhitungan as &$item) {
-            $item['probabilitas'] = exp($item['log_posterior'] - $maxLog);
-            $expSum += $item['probabilitas'];
+        $top = $evaluasiAturan[0] ?? null;
+        if ($top && $top['match_percentage'] >= 50.0) {
+            $statusKesimpulan = 'parsial';
+            $penyakitTerpilih = Penyakit::find($top['penyakit_id']);
+        } else {
+            $statusKesimpulan = 'tidak_cocok';
+            $penyakitTerpilih = null;
         }
-        unset($item);
-
-        foreach ($hasilPerhitungan as &$item) {
-            $item['probabilitas'] = $expSum > 0 ? $item['probabilitas'] / $expSum : 0;
-        }
-        unset($item);
     }
 
-    // Urutkan hasil dari probabilitas terbesar ke terkecil
-    usort($hasilPerhitungan, function ($a, $b) {
-        return $b['probabilitas'] <=> $a['probabilitas'];
-    });
-
-    $topResult = $hasilPerhitungan[0] ?? null;
-    
-    // 3. Penerapan Aturan Ambang Batas (Threshold) 50%
-    if ($topResult && $topResult['probabilitas'] >= 0.5) {
-        $penyakitId = $topResult['id'];
-        $p = $penyakit->firstWhere('id', $penyakitId);
-        $solusiList = $p?->solusi?->pluck('deskripsi_solusi')?->implode("\n\n");
-        $solusi = $solusiList ?: ($p?->keterangan ?? null);
-    } else {
-        $penyakitId = null;
-        $solusi = 'Gejala yang Anda rasakan tidak cukup spesifik untuk mendiagnosa penyakit tertentu (semua probabilitas < 50%). Silakan konsultasikan lebih lanjut dengan dokter kandungan atau bidan.';
-    }
-
-    // Simpan rincian hasil ke database
-    $probabilitas = [];
-    foreach ($hasilPerhitungan as $item) {
-        $probabilitas[] = [
-            'nama_penyakit' => $item['nama_penyakit'],
-            'probabilitas' => round($item['probabilitas'], 6),
-        ];
-    }
-
-    $hasil = Hasil::create([
-        'nama_pasien' => $validated['nama_pasien'],
-        'alamat_pasien' => $validated['alamat_pasien'] ?? null,
-        'penyakit_id' => $penyakitId,
-        'solusi' => $solusi,
-        'probabilitas' => $probabilitas,
-    ]);
-
-    return view('diagnosa.hasil', compact('hasil', 'hasilPerhitungan'));
+    return [
+        'penyakit_id' => $penyakitTerpilih?->id,
+        'status_kesimpulan' => $statusKesimpulan,
+        'detail_inferensi' => [...],
+    ];
 }
 ```

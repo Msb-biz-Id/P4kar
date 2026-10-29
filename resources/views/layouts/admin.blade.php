@@ -49,8 +49,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.relasi.index') }}" class="nav-link {{ request()->routeIs('admin.relasi.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-project-diagram"></i><p>Data Relasi</p>
+                        <a href="{{ route('admin.aturan.index') }}" class="nav-link {{ request()->routeIs('admin.aturan.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-code-branch"></i><p>Basis Aturan (Rules)</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -61,6 +61,11 @@
                     <li class="nav-item">
                         <a href="{{ route('admin.hasil.index') }}" class="nav-link {{ request()->routeIs('admin.hasil.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt"></i><p>Hasil Diagnosa</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.simulasi.index') }}" class="nav-link {{ request()->routeIs('admin.simulasi.*') ? 'active' : '' }}" style="background: rgba(40, 167, 69, 0.15); border-radius: 4px;">
+                            <i class="nav-icon fas fa-clipboard-check text-success"></i><p><strong>Uji Validasi</strong></p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -99,5 +104,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+@stack('scripts')
 </body>
 </html>

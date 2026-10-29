@@ -7,8 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Penyakit extends Model
 {
-    protected $fillable = ['nama_penyakit', 'keterangan'];
+    protected $fillable = ['kode_penyakit', 'nama_penyakit', 'keterangan'];
     protected $table = 'penyakit';
+
+    public function aturans(): HasMany
+    {
+        return $this->hasMany(Aturan::class);
+    }
 
     public function relasis(): HasMany
     {

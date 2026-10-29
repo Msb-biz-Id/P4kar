@@ -4,7 +4,7 @@
             <i class="fas fa-heartbeat me-2 text-teal-600" style="color: #0d9488;"></i>
             <span>Sistem Pakar <span style="font-weight: 800; color: #111827;">Ibu Hamil</span></span>
         </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
