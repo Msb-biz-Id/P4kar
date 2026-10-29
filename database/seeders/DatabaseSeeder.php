@@ -8,6 +8,7 @@ use App\Models\Gejala;
 use App\Models\Aturan;
 use App\Models\Relasi;
 use App\Models\Solusi;
+use App\Models\Hasil;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -28,6 +29,15 @@ class DatabaseSeeder extends Seeder
         );
 
         // 2. Buat Data 3 Penyakit (Tabel 3.1)
+        // Adopsi baris penyakit lama (dibuat sebelum kolom kode_penyakit ada, kode masih NULL)
+        // berdasarkan nama_penyakit agar tidak terduplikasi saat seeding di database lama.
+        foreach (['P01' => 'Anemia', 'P02' => 'Pankreatitis', 'P03' => 'Diabetes Melitus'] as $kodeAdopsi => $namaAdopsi) {
+            $legacy = Penyakit::whereNull('kode_penyakit')->where('nama_penyakit', $namaAdopsi)->orderBy('id')->first();
+            if ($legacy && !Penyakit::where('kode_penyakit', $kodeAdopsi)->exists()) {
+                $legacy->update(['kode_penyakit' => $kodeAdopsi]);
+            }
+        }
+
         $penyakits = [
             'P01' => Penyakit::updateOrCreate(
                 ['kode_penyakit' => 'P01'],
@@ -118,6 +128,15 @@ class DatabaseSeeder extends Seeder
         ];
 
         $gejalas = [];
+        // Adopsi gejala lama (dibuat sebelum kolom kode_gejala ada, kode masih NULL)
+        // berdasarkan nama_gejala agar tidak terduplikasi saat seeding di database lama.
+        foreach ($daftarGejala as $kodeAdopsi => $namaAdopsi) {
+            $legacy = Gejala::whereNull('kode_gejala')->where('nama_gejala', $namaAdopsi)->orderBy('id')->first();
+            if ($legacy && !Gejala::where('kode_gejala', $kodeAdopsi)->exists()) {
+                $legacy->update(['kode_gejala' => $kodeAdopsi]);
+            }
+        }
+
         foreach ($daftarGejala as $kode => $nama) {
             $gejalas[$kode] = Gejala::updateOrCreate(
                 ['kode_gejala' => $kode],
@@ -495,6 +514,28 @@ class DatabaseSeeder extends Seeder
                     'bobot' => 1.0,
                 ]);
             }
+        }
+
+        // 7. Bersihkan baris duplikat lama (sisa data sebelum kolom kode ada) yang namanya
+        // sudah terwakili baris baru berkode. Referensi aturan/hasil diarahkan dulu ke baris
+        // baru, baru baris lama dihapus (relasi & solusi ikut terhapus via cascade FK).
+        $penyakitBaru = Penyakit::whereNotNull('kode_penyakit')->get()->keyBy('nama_penyakit');
+        foreach (Penyakit::whereNull('kode_penyakit')->get() as $legacy) {
+            $target = $penyakitBaru[$legacy->nama_penyakit] ?? null;
+            if (!$target) {
+                continue;
+            }
+            Aturan::where('penyakit_id', $legacy->id)->update(['penyakit_id' => $target->id]);
+            Hasil::where('penyakit_id', $legacy->id)->update(['penyakit_id' => $target->id]);
+            $legacy->delete();
+        }
+
+        $gejalaBaru = Gejala::whereNotNull('kode_gejala')->get()->keyBy('nama_gejala');
+        foreach (Gejala::whereNull('kode_gejala')->get() as $legacy) {
+            if (!$gejalaBaru->has($legacy->nama_gejala)) {
+                continue;
+            }
+            $legacy->delete();
         }
     }
 }
